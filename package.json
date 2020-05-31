@@ -1,0 +1,16 @@
+{
+  "name": "kap-checker-v2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cheerio": "1.0.0-rc.3",
+    "express": "4.17.1",
+    "axios": "0.19.2"
+  },
+  "author": "",
+  "license": "ISC"
+}
