@@ -43,8 +43,9 @@ app.get('/', function (req, res) {
 			res.send(JSON.stringify(data));
 		});
 	}
-	
-	res.send("git burdan :(");
+	else{
+		res.send("git burdan :(");
+	}
 	
 });
 
