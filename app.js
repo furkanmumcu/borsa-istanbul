@@ -7,6 +7,9 @@ const app = express();
 
 app.get('/', function (req, res) {
 
+	console.log(req.get('API_TOKEN'))
+	console.log(process.env.API_TOKEN)
+
 	if(req.get('API_TOKEN') && req.get('API_TOKEN') == process.env.API_TOKEN) {
 		axios.get('http://www.kap.org.tr/tr/Sektorler').then(resp => {
 
