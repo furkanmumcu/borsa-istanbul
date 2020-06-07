@@ -3,6 +3,7 @@ const axios = require('axios');
 const express = require('express');
 const app = express();
 const fs = require('fs');
+let admin = require("firebase-admin");
 
 app.get('/', function (req, res) {
 	if(!checkToken(req)) {
@@ -13,6 +14,11 @@ app.get('/', function (req, res) {
 	else{
 		res.send("git burdan :(");
 	}
+});
+
+app.get('/testFCM', function (req, res) {
+	sendMessageToMobile();
+	res.send("ok!");
 });
 
 const PORT = process.env.PORT || 8888;
@@ -121,4 +127,45 @@ async function compareBorsaData(sirketler, sirketKodlari){
 	//writeJsonFile ile sirketler ve sirketKodlarini tekrar yaz
 	await writeJsonFile("sirketler", sirketler);
 	await writeJsonFile("sirketKodlari", sirketKodlari);
+};
+
+
+
+//FCM impl
+
+let serviceAccount = {
+	type: process.env.pkey_type,
+	project_id: process.env.pkey_project_id,
+	private_key_id: process.env.pkey_private_key_id,
+	private_key: process.env.pkey_private_key,
+	client_email: process.env.pkey_client_email,
+	client_id: process.env.pkey_client_id,
+	auth_uri: process.env.pkey_auth_uri,
+	token_uri: process.env.pkey_token_uri,
+	auth_provider_x509_cert_url: process.env.pkey_auth_provider_x509_cert_url,
+	client_x509_cert_url: process.env.pkey_client_x509_cert_url,
+};
+
+admin.initializeApp({
+	credential: admin.credential.cert(serviceAccount),
+	databaseURL: process.env.fcm_databaseURL
+});
+
+let registrationToken =  process.env.registrationToken;
+
+function sendMessageToMobile(data = {}, notification = {"title":"default", "body":"default"}){
+	var message = {
+		data: data,
+		notification: notification,
+		token: registrationToken
+	};
+	
+	admin.messaging().send(message)
+	.then((response) => {
+		// Response is a message ID string.
+		console.log('Successfully sent message:', response);
+	})
+	.catch((error) => {
+		console.log('Error sending message:', error);
+	});
 };
