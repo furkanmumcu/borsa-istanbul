@@ -137,7 +137,7 @@ let serviceAccount = {
 	type: process.env.pkey_type,
 	project_id: process.env.pkey_project_id,
 	private_key_id: process.env.pkey_private_key_id,
-	private_key: process.env.pkey_private_key,
+	private_key: process.env.pkey_private_key.replace(/\\n/g, '\n'),
 	client_email: process.env.pkey_client_email,
 	client_id: process.env.pkey_client_id,
 	auth_uri: process.env.pkey_auth_uri,
