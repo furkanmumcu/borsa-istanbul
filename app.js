@@ -5,6 +5,11 @@ const app = express();
 const fs = require('fs');
 let admin = require("firebase-admin");
 
+
+//--------------------------------------------------------------------
+//--------------- Router ---------------------------------------------
+//--------------------------------------------------------------------
+
 app.get('/', function (req, res) {
 	res.send("ok!");
 });
@@ -25,10 +30,19 @@ app.get('/testFCM', function (req, res) {
 	res.send("ok!");
 });
 
+function checkToken(req){
+	return req.get('API_TOKEN') && req.get('API_TOKEN') == process.env.API_TOKEN;
+}
+
 const PORT = process.env.PORT || 8888;
 console.log("listening on port: " + PORT);
 app.listen(PORT);
 initializeFCM();
+
+
+//--------------------------------------------------------------------
+//--------------- checkBorsa logic and helper functions --------------
+//--------------------------------------------------------------------
 
 function checkBorsa(){
 	axios.get('http://www.kap.org.tr/tr/Sektorler').then(resp => {
@@ -71,11 +85,6 @@ function checkBorsa(){
 		compareBorsaData(sirketler, sirketKodlari);
 
 	});
-}
-
-
-function checkToken(req){
-	return req.get('API_TOKEN') && req.get('API_TOKEN') == process.env.API_TOKEN;
 }
 
 class Sirket {
@@ -152,8 +161,9 @@ async function compareBorsaData(sirketler, sirketKodlari){
 };
 
 
-
-//FCM impl
+//--------------------------------------------------------------------
+// -------------- FCM impl -------------------------------------------
+//--------------------------------------------------------------------
 
 function initializeFCM(){
 	try {
@@ -180,16 +190,14 @@ function initializeFCM(){
 	}
 };
 
-let registrationToken =  process.env.registrationToken;
-
 function sendMessageToMobile(data = {}, notification = {"title":"default", "body":"default"}){
 	return new Promise(function(resolve,reject){
 		var message = {
 			data: data,
 			notification: notification,
-			token: registrationToken
+			token: process.env.registrationToken
 		};
-		
+		console.log("fcm message: " + message);
 		admin.messaging().send(message)
 		.then((response) => {
 			// Response is a message ID string.
