@@ -6,6 +6,10 @@ const fs = require('fs');
 let admin = require("firebase-admin");
 
 app.get('/', function (req, res) {
+	res.send("ok!");
+});
+
+app.get('/checkBorsa', function (req, res) {
 	if(!checkToken(req)) {
 		console.log("ok!");
 		res.send("ok!");
@@ -24,6 +28,7 @@ app.get('/testFCM', function (req, res) {
 const PORT = process.env.PORT || 8888;
 console.log("listening on port: " + PORT);
 app.listen(PORT);
+initializeFCM();
 
 function checkBorsa(){
 	axios.get('http://www.kap.org.tr/tr/Sektorler').then(resp => {
@@ -85,8 +90,8 @@ function writeJsonFile(fileName, content){
 	return new Promise(function(resolve,reject){
 		fs.writeFile("./" + fileName + ".json", JSON.stringify(content), function(err) {
 			if(err) {
-				return console.log(err);
 				reject();
+				return console.log(err);
 			}
 			resolve();
 		}); 
@@ -97,8 +102,8 @@ function readJsonFile(fileName){
 	return new Promise(function(resolve,reject){
 		fs.readFile("./" + fileName + ".json",  "utf8", function(err, data) {
 			if(err) {
-				return console.log(err);
 				reject();
+				return console.log(err);
 			}
 			resolve(JSON.parse(data));
 		}); 
@@ -113,16 +118,33 @@ async function testingLogic(fileName, content){
 
 async function compareBorsaData(sirketler, sirketKodlari){
 	//readJsonFile ile eskisirketleri ve eskisirketkodlarini al
-	let oldSirketler = await readJsonFile("sirketler");
+	let oldSirketler = await readJsonFile("sirketler"); // will be used later
 	let oldsirketKodlari = await readJsonFile("sirketKodlari");
+	console.log("guncel sirket kodlari: " + sirketKodlari + "\n bir onceki sirket kodlari: " + oldsirketKodlari);
 
 	//eski sirketkodlari ile yenisini karsilastir
-	let yeniSirketler = sirketKodlari.filter(x => !oldsirketKodlari.includes(x));
-	let cikanSirketler = oldsirketKodlari.filter(x => !sirketKodlari.includes(x));
+	let borsayaGirenSirketler = sirketKodlari.filter(x => !oldsirketKodlari.includes(x));
+	let borsadanCikanSirketler = oldsirketKodlari.filter(x => !sirketKodlari.includes(x)); // will be used later
 
-	console.log("yeniSirketler: " + yeniSirketler + " cikanSirketler: " + cikanSirketler);
+	console.log("borsayaGirenSirketler: " + borsayaGirenSirketler + " borsadanCikanSirketler: " + borsadanCikanSirketler);
+	
 	//firebase e mesaj yolla
+	let notification = {
+		title: '',
+		body: '',
+	};
+	if(borsayaGirenSirketler.length == 0){
+		notification.title = 'BorsaApp';
+		notification.body = 'Borsaya yeni giren şirket bulunmamaktadır'
+	}
+	if(borsayaGirenSirketler.length > 0){
+		notification.title = 'BorsaApp Yeni Şirket!';
+		notification.body = 'Borsaya yeni giren şirketler: ' + JSON.stringify(borsayaGirenSirketler);
+	}
 
+	await sendMessageToMobile(undefined, notification).catch((error) => {
+		console.log(error);
+	});
 
 	//writeJsonFile ile sirketler ve sirketKodlarini tekrar yaz
 	await writeJsonFile("sirketler", sirketler);
@@ -133,39 +155,50 @@ async function compareBorsaData(sirketler, sirketKodlari){
 
 //FCM impl
 
-let serviceAccount = {
-	type: process.env.pkey_type,
-	project_id: process.env.pkey_project_id,
-	private_key_id: process.env.pkey_private_key_id,
-	private_key: process.env.pkey_private_key.replace(/\\n/g, '\n'),
-	client_email: process.env.pkey_client_email,
-	client_id: process.env.pkey_client_id,
-	auth_uri: process.env.pkey_auth_uri,
-	token_uri: process.env.pkey_token_uri,
-	auth_provider_x509_cert_url: process.env.pkey_auth_provider_x509_cert_url,
-	client_x509_cert_url: process.env.pkey_client_x509_cert_url,
+function initializeFCM(){
+	try {
+		let serviceAccount = {
+			type: process.env.pkey_type,
+			project_id: process.env.pkey_project_id,
+			private_key_id: process.env.pkey_private_key_id,
+			private_key: process.env.pkey_private_key.replace(/\\n/g, '\n'),
+			client_email: process.env.pkey_client_email,
+			client_id: process.env.pkey_client_id,
+			auth_uri: process.env.pkey_auth_uri,
+			token_uri: process.env.pkey_token_uri,
+			auth_provider_x509_cert_url: process.env.pkey_auth_provider_x509_cert_url,
+			client_x509_cert_url: process.env.pkey_client_x509_cert_url,
+		};
+		
+		admin.initializeApp({
+			credential: admin.credential.cert(serviceAccount),
+			databaseURL: process.env.fcm_databaseURL
+		});
+				
+	} catch (error) {
+		console.error("initializeFCM Error: " + error);
+	}
 };
-
-admin.initializeApp({
-	credential: admin.credential.cert(serviceAccount),
-	databaseURL: process.env.fcm_databaseURL
-});
 
 let registrationToken =  process.env.registrationToken;
 
 function sendMessageToMobile(data = {}, notification = {"title":"default", "body":"default"}){
-	var message = {
-		data: data,
-		notification: notification,
-		token: registrationToken
-	};
-	
-	admin.messaging().send(message)
-	.then((response) => {
-		// Response is a message ID string.
-		console.log('Successfully sent message:', response);
+	return new Promise(function(resolve,reject){
+		var message = {
+			data: data,
+			notification: notification,
+			token: registrationToken
+		};
+		
+		admin.messaging().send(message)
+		.then((response) => {
+			// Response is a message ID string.
+			console.log('Successfully sent message:', response);
+			resolve();
+		})
+		.catch((error) => {
+			//console.log('Error sending message:', error);
+			reject('Error sending message:', error);
+		});
 	})
-	.catch((error) => {
-		console.log('Error sending message:', error);
-	});
 };
