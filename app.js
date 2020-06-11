@@ -10,7 +10,18 @@ let admin = require("firebase-admin");
 //--------------- Router ---------------------------------------------
 //--------------------------------------------------------------------
 
+app.use('/', function (req, res, next) {
+	console.log('Request Type:', req.method)	
+	if(process.env.SECURITY == 'enabled'){
+		checkToken() ? next() : res.send("denied");
+	}
+	else{
+		next();
+	}
+});
+
 app.get('/', function (req, res) {
+	console.log("ok!");
 	res.send("ok!");
 });
 
@@ -28,6 +39,10 @@ app.get('/checkBorsa', function (req, res) {
 app.get('/testFCM', function (req, res) {
 	sendMessageToMobile();
 	res.send("ok!");
+});
+
+app.get('/test', function (req, res) {
+	res.send("test!");
 });
 
 function checkToken(req){
