@@ -13,7 +13,7 @@ let admin = require("firebase-admin");
 app.use('/', function (req, res, next) {
 	console.log('Request Type:', req.method)	
 	if(process.env.SECURITY == 'enabled'){
-		checkToken() ? next() : res.send("denied");
+		checkToken(req) ? next() : res.send("denied");
 	}
 	else{
 		next();
