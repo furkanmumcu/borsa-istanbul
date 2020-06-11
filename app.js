@@ -11,7 +11,6 @@ let admin = require("firebase-admin");
 //--------------------------------------------------------------------
 
 app.use('/', function (req, res, next) {
-	console.log('Request Type:', req.method)	
 	if(process.env.SECURITY == 'enabled'){
 		checkToken(req) ? next() : res.send("denied");
 	}
@@ -26,14 +25,9 @@ app.get('/', function (req, res) {
 });
 
 app.get('/checkBorsa', function (req, res) {
-	if(!checkToken(req)) {
-		console.log("ok!");
-		res.send("ok!");
-		checkBorsa();
-	}
-	else{
-		res.send("git burdan :(");
-	}
+	console.log("ok!");
+	res.send("ok!");
+	checkBorsa();
 });
 
 app.get('/testFCM', function (req, res) {
