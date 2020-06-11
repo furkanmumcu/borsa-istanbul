@@ -147,20 +147,20 @@ async function compareBorsaData(sirketler, sirketKodlari){
 	console.log("borsayaGirenSirketler: " + borsayaGirenSirketler + " borsadanCikanSirketler: " + borsadanCikanSirketler);
 	
 	//firebase e mesaj yolla
-	let notification = {
+	let fcmData = {
 		title: '',
 		body: '',
 	};
 	if(borsayaGirenSirketler.length == 0){
-		notification.title = 'BorsaApp';
-		notification.body = 'Borsaya yeni giren şirket bulunmamaktadır'
+		fcmData.title = 'BorsaApp';
+		fcmData.body = 'Borsaya yeni giren şirket bulunmamaktadır'
 	}
 	if(borsayaGirenSirketler.length > 0){
-		notification.title = 'BorsaApp Yeni Şirket!';
-		notification.body = 'Borsaya yeni giren şirketler: ' + JSON.stringify(borsayaGirenSirketler);
+		fcmData.title = 'BorsaApp Yeni Şirket!';
+		fcmData.body = 'Borsaya yeni giren şirketler: ' + JSON.stringify(borsayaGirenSirketler);
 	}
 
-	await sendMessageToMobile(undefined, notification).catch((error) => {
+	await sendMessageToMobile(fcmData).catch((error) => {
 		console.log(error);
 	});
 
@@ -199,14 +199,14 @@ function initializeFCM(){
 	}
 };
 
-function sendMessageToMobile(data = {}, notification = {"title":"default", "body":"default"}){
+function sendMessageToMobile(data = {"title":"default", "body":"default"}){
 	return new Promise(function(resolve,reject){
 		var message = {
 			data: data,
-			notification: notification,
+			//notification: notification,
 			token: process.env.registrationToken
 		};
-		console.log("fcm message: " + message);
+		console.log("fcm message: " + JSON.stringify(message.data));
 		admin.messaging().send(message)
 		.then((response) => {
 			// Response is a message ID string.
