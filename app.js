@@ -106,7 +106,7 @@ class Sirket {
 
 function writeJsonFile(fileName, content){
 	return new Promise(function(resolve,reject){
-		fs.writeFile("./" + fileName + ".json", JSON.stringify(content), function(err) {
+		fs.writeFile("./data/" + fileName + ".json", JSON.stringify(content), function(err) {
 			if(err) {
 				reject();
 				return console.log(err);
@@ -118,7 +118,7 @@ function writeJsonFile(fileName, content){
 
 function readJsonFile(fileName){
 	return new Promise(function(resolve,reject){
-		fs.readFile("./" + fileName + ".json",  "utf8", function(err, data) {
+		fs.readFile("./data/" + fileName + ".json",  "utf8", function(err, data) {
 			if(err) {
 				reject();
 				return console.log(err);
