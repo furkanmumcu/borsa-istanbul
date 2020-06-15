@@ -201,16 +201,29 @@ function initializeFCM(){
 
 function sendMessageToMobile(data = {"title":"default", "body":"default"}){
 	return new Promise(function(resolve,reject){
-		var message = {
+		let registrationTokens = [
+			process.env.registrationToken1,
+			process.env.registrationToken2,
+		];
+		
+		let message = {
 			data: data,
 			//notification: notification,
-			token: process.env.registrationToken
+			token: process.env.registrationTokens
 		};
 		console.log("fcm message: " + JSON.stringify(message.data));
-		admin.messaging().send(message)
+		admin.messaging().sendMulticast(message)
 		.then((response) => {
-			// Response is a message ID string.
-			console.log('Successfully sent message:', response);
+			if (response.failureCount > 0) {
+				const failedTokens = [];
+				response.responses.forEach((resp, idx) => {
+				  if (!resp.success) {
+					failedTokens.push(registrationTokens[idx]);
+				  }
+				});
+				console.log('List of tokens that caused failures: ' + failedTokens);
+			}
+			console.log('Successfully sent message:', JSON.stringify(response));
 			resolve();
 		})
 		.catch((error) => {
