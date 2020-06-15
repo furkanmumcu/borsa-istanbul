@@ -209,7 +209,7 @@ function sendMessageToMobile(data = {"title":"default", "body":"default"}){
 		let message = {
 			data: data,
 			//notification: notification,
-			token: process.env.registrationTokens
+			tokens: process.env.registrationTokens
 		};
 		console.log("fcm message: " + JSON.stringify(message.data));
 		admin.messaging().sendMulticast(message)
