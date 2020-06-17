@@ -137,7 +137,7 @@ async function testingLogic(fileName, content){
 
 async function compareBorsaData(sirketler, sirketKodlari){
 	//readJsonFile ile eskisirketleri ve eskisirketkodlarini al
-	let oldSirketler = await readJsonFile("sirketler"); // will be used later
+	//let oldSirketler = await readJsonFile("sirketler"); // will be used later
 	let oldsirketKodlari = await readJsonFile("sirketKodlari");
 	console.log("guncel sirket kodlari: " + sirketKodlari + "\n bir onceki sirket kodlari: " + oldsirketKodlari);
 
@@ -166,7 +166,7 @@ async function compareBorsaData(sirketler, sirketKodlari){
 	});
 
 	//writeJsonFile ile sirketler ve sirketKodlarini tekrar yaz
-	await writeJsonFile("sirketler", sirketler);
+	//await writeJsonFile("sirketler", sirketler);
 	await writeJsonFile("sirketKodlari", sirketKodlari);
 };
 
