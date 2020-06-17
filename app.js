@@ -108,9 +108,10 @@ function writeJsonFile(fileName, content){
 	return new Promise(function(resolve,reject){
 		fs.writeFile("./data/" + fileName + ".json", JSON.stringify(content), function(err) {
 			if(err) {
+				console.log('writeJsonFile err: ' + err);
 				reject();
-				return console.log(err);
 			}
+			console.log('write success: ' + JSON.stringify(content));
 			resolve();
 		}); 
 	})
@@ -120,8 +121,8 @@ function readJsonFile(fileName){
 	return new Promise(function(resolve,reject){
 		fs.readFile("./data/" + fileName + ".json",  "utf8", function(err, data) {
 			if(err) {
+				console.log('readJsonFile err: ' + err);
 				reject();
-				return console.log(err);
 			}
 			resolve(JSON.parse(data));
 		}); 
