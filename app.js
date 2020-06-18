@@ -119,7 +119,7 @@ function writeJsonFile(fileName, content){
 
 function readJsonFile(fileName){
 	return new Promise(function(resolve,reject){
-		fs.readFile("./data/" + fileName + ".json",  {"encoding" : 'utf-8', "flag": 'rs+'}, function(err, data) {
+		fs.readFile("./data/" + fileName + ".json", 'utf-8', function(err, data) {
 			if(err) {
 				console.log('readJsonFile err: ' + err);
 				reject();
@@ -168,8 +168,6 @@ async function compareBorsaData(sirketler, sirketKodlari){
 	//writeJsonFile ile sirketler ve sirketKodlarini tekrar yaz
 	//await writeJsonFile("sirketler", sirketler);
 	await writeJsonFile("sirketKodlari", sirketKodlari);
-	console.log(require.cache[fs]);
-	console.log(require.cache["fs"]);
 };
 
 
